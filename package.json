@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Mpalko07/tinyapp/issues"
   },
-  "homepage": "https://github.com/Mpalko07/tinyapp#readme"
+  "homepage": "https://github.com/Mpalko07/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.3"
+  }
 }

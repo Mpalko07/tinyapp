@@ -2,20 +2,31 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
-
 app.use(express.urlencoded({ extended: true }));
-
-app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
-});
-
-app.set("view engine", "ejs");
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+function generateRandomString() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomString = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomString += characters[randomIndex];
+  }
+  return randomString;
+}
+
+app.post("/urls", (req, res) => {
+  const longURL = req.body.longURL; // Retrieve the longURL from the request body
+  const shortURL = generateRandomString(); // Generate a shortURL
+  urlDatabase[shortURL] = longURL; // Write the shortURL and longURL to the urlDatabase
+  res.redirect(`/urls/${shortURL}`); // Redirect to /urls/:id
+});
+
+app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -66,13 +77,3 @@ app.get("/u/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-function generateRandomString() {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let randomString = '';
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    randomString += characters[randomIndex];
-  }
-  return randomString;
-}

@@ -60,8 +60,13 @@ app.get("/set", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const templateVars = { id: req.params.id, longURL: urlDatabase[id] };
-  res.render("urls_show", templateVars);
+  const longURL = urlDatabase[id]; // Retrieve the long URL from the database based on the short URL ID
+  if (longURL) {
+    const templateVars = { id: id, longURL: longURL };
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(404).send("Short URL not found");
+  }
 });
 
 app.get("/u/:id", (req, res) => {

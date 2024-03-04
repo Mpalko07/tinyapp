@@ -74,6 +74,16 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  if (urlDatabase.hasOwnProperty(id)) {
+    delete urlDatabase[id]; // Use delete operator to remove the URL from the database
+    res.redirect("/urls"); // Redirect back to the urls_index page ("/urls")
+  } else {
+    res.status(404).send("Short URL not found");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });

@@ -53,10 +53,19 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
+  if (urlDatabase.hasOwnProperty(shortURL)) {
+    const longURL = urlDatabase[shortURL];
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Short URL not found");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
 
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

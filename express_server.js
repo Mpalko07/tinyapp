@@ -2,6 +2,14 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
+
+app.use(express.urlencoded({ extended: true }));
+
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -30,6 +38,10 @@ app.get("/set", (req, res) => {
   res.send(`a = ${a}`);
  });
 
+ app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
  app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
@@ -44,3 +56,14 @@ app.get("/urls/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
+function generateRandomString() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomString = '';
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomString += characters[randomIndex];
+  }
+  return randomString;
+}

@@ -1,37 +1,30 @@
-<header>
-  <nav class="navbar navbar-expand-md navbar-dark bg-success">
-    <a class="navbar-brand" href="/urls">TinyApp</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-toggle="collapse"
-      data-target="#navbarNavAltMarkup"
-      aria-controls="navbarNavAltMarkup"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-      </div>
+<nav class="navbar navbar-expand-md navbar-dark bg-success">
+  <a class="navbar-brand" href="/urls">TinyApp</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" href="/urls">My URLs</a>
+      <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
     </div>
-    <% if (username) { %>
-      <form class="form-inline" method="POST" action="/logout">
-        <div class="form-group mx-sm-3 mb-2">
-          <span class="navbar-text text-white">Logged in as <%= username %></span>
-        </div>
-        <button type="submit" class="btn btn-light mb-2">Logout</button>
-      </form>
-    <% } else { %>
-      <form class="form-inline" method="POST" action="/login">
-        <div class="form-group mx-sm-3 mb-2">
-          <input type="text" class="form-control" id="username" name="username" placeholder="Username">
-        </div>
-        <button type="submit" class="btn btn-light mb-2">Login</button>
-      </form>
-    <% } %>
-  </nav>
-</header>
+  </div>
+  <% if (user) { %>
+    <form class="form-inline" method="POST" action="/logout">
+      <button type="submit" class="btn btn-light mb-2">Logout</button>
+    </form>
+    <div class="ml-auto">
+      <span class="navbar-text text-white">Logged in as <%= user.email %></span>
+    </div>
+  <% } else { %>
+    <form class="form-inline" method="POST" action="/login">
+      <div class="form-group mx-sm-3 mb-2">
+        <input type="text" class="form-control" id="email" name="email" placeholder="Email">
+      </div>
+      <div class="form-group mx-sm-3 mb-2">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+      </div>
+      <button type="submit" class="btn btn-light mb-2">Login</button>
+    </form>
+  <% } %>
+</nav>

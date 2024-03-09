@@ -11,6 +11,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -65,12 +78,16 @@ app.get("/fetch", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  res.render("urls_new", { user: user });
 });
 
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
   const templateVars = {
-    username: req.cookies["username"],
+    user: user,
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -79,8 +96,10 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
   if (longURL) {
-    const templateVars = { id: id, longURL: longURL };
+    const templateVars = { id: id, longURL: longURL, user: user };
     res.render("urls_show", templateVars);
   } else {
     res.status(404).send("Short URL not found");
@@ -109,6 +128,19 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.get('/register', (req, res) => {
   res.render('register');
+});
+
+app.post("/register", (req, res) => {
+  const { email, password } = req.body;
+  const userId = generateRandomString();
+  const newUser = {
+    id: userId,
+    email,
+    password
+  };
+  users[userId] = newUser;
+  res.cookie("user_id", userId);
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {

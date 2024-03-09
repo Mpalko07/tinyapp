@@ -41,6 +41,15 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+const getUserByEmail = (email) => {
+  for (const userId in users) {
+    if (users[userId].email === email) {
+      return users[userId];
+    }
+  }
+  return null;
+};
+
 app.set("view engine", "ejs");
 
 // Login route
@@ -132,6 +141,22 @@ app.get('/register', (req, res) => {
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+
+  // Check if email/password are empty
+  if (!email || !password) {
+    res.status(400).send('Please enter both email and passowrd');
+    return;
+  }
+
+  // Check if email already exists
+  for (let userId in users) {
+    if (users[userId].email === email) {
+     res.status(400).send('Email already exists');
+      return;
+    }
+  }
+
+  // Proceed with registration
   const userId = generateRandomString();
   const newUser = {
     id: userId,

@@ -54,8 +54,12 @@ app.set("view engine", "ejs");
 
 // Login route
 app.post("/login", (req, res) => {
-  const { username } = req.body;
-  res.cookie("username", username);
+  const { email, password } = req.body;
+  const user = getUserByEmail(email);
+  if (!user || user.password !== password) {
+    return res.status(403).send("Invalid email or password");
+  }
+  res.cookie("user_id", user.id);
   res.redirect("/urls");
 });
 
@@ -166,6 +170,10 @@ app.post("/register", (req, res) => {
   users[userId] = newUser;
   res.cookie("user_id", userId);
   res.redirect("/urls");
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
 });
 
 app.listen(PORT, () => {

@@ -17,14 +17,7 @@
       <span class="navbar-text text-white">Logged in as <%= user.email %></span>
     </div>
   <% } else { %>
-    <form class="form-inline" method="POST" action="/login">
-      <div class="form-group mx-sm-3 mb-2">
-        <input type="text" class="form-control" id="email" name="email" placeholder="Email">
-      </div>
-      <div class="form-group mx-sm-3 mb-2">
-        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-      </div>
-      <button type="submit" class="btn btn-light mb-2">Login</button>
-    </form>
+    <a class="nav-item nav-link" href="/register">Register</a>
+    <a class="nav-item nav-link" href="/login">Login</a>
   <% } %>
 </nav>

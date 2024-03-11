@@ -4,19 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <h2>Register</h2>
-    <form action="/register" method="POST">
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
+    <nav class="navbar navbar-expand-md navbar-dark bg-success">
+      <a class="navbar-brand" href="/urls">TinyApp</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/urls">My URLs</a>
+          <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Register</button>
-    </form>
+      </div>
+      <a class="nav-item nav-link btn btn-primary" href="/register">Register</a>
+      <a class="nav-item nav-link btn btn-primary" href="/login">Login</a>
+    </nav>
+    <div class="container">
+        <h2 class="mt-5">Register</h2>
+        <form class="mt-3" action="/register" method="POST">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
 </body>
 </html>

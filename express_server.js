@@ -65,8 +65,8 @@ app.post("/login", (req, res) => {
 
 // Logout route
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
-  res.redirect("/urls");
+  res.clearCookie("user_id");
+  res.redirect("/login");
 });
 
 app.get("/", (req, res) => {

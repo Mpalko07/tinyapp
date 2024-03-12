@@ -1,16 +1,16 @@
-const express = require("express"); // Import the Express.js library
-const cookieParser = require("cookie-parser"); // Import the cookie-parser middleware
-const app = express(); // Create an Express application
-const PORT = 8080; // Define the port number
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const app = express();
+const PORT = 8080;
 
-// Middleware to parse URL-encoded bodies
+//Middleware setup
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // Middleware to parse cookies
+app.use(cookieParser());
 
 // Database of short URLs
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
 // Database of users
@@ -27,7 +27,7 @@ const users = {
   },
 };
 
-// Function to generate a random string for short URLs
+// Function to generate random string
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -38,7 +38,7 @@ function generateRandomString() {
   return randomString;
 }
 
-// Function to get a user by their email
+// Function to get user by email
 const getUserByEmail = (email) => {
   for (const userId in users) {
     if (users[userId].email === email) {
@@ -48,10 +48,78 @@ const getUserByEmail = (email) => {
   return null;
 };
 
-// Set EJS as the template engine
+// Function to associate URLs with specific users
+const associateURLsWithUsers = (userID) => {
+  const userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === userID) {
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
+};
+
+// Route to handle displaying URLs specific to the logged-in user
+app.get("/urls", (req, res) => {
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    res.send("<html><body><h1>Please <a href='/login'>login</a> or <a href='/register'>register</a> to view URLs</h1></body></html>");
+    return;
+  }
+  const userURLs = associateURLsWithUsers(userID);
+  const templateVars = {
+    user: users[userID],
+    urls: userURLs
+  };
+  res.render("urls_index", templateVars);
+});
+
+// Route to handle editing URLs
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    res.status(401).send("You must be logged in to edit this URL.");
+    return;
+  }
+  const url = urlDatabase[shortURL];
+  if (!url) {
+    res.status(404).send("URL not found");
+    return;
+  }
+  if (url.userID !== userID) {
+    res.status(403).send("You do not have permission to edit this URL.");
+    return;
+  }
+  urlDatabase[shortURL].longURL = req.body.longURL;
+  res.redirect("/urls");
+});
+
+// Route to handle deleting URLs
+app.post("/urls/:id/delete", (req, res) => {
+  const shortURL = req.params.id;
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    res.status(401).send("You must be logged in to delete this URL.");
+    return;
+  }
+  const url = urlDatabase[shortURL];
+  if (!url) {
+    res.status(404).send("URL not found");
+    return;
+  }
+  if (url.userID !== userID) {
+    res.status(403).send("You do not have permission to delete this URL.");
+    return;
+  }
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
+// Setting the view engine
 app.set("view engine", "ejs");
 
-// Route to handle user login
+// Login route
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = getUserByEmail(email);
@@ -62,101 +130,77 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-// Route to handle user logout
+// Logout route
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
 });
 
-// Route to render the login page
+// Login page route
 app.get("/login", (req, res) => {
   if (req.cookies.user_id) {
-    res.redirect("/urls"); // Redirect to /urls if user is already logged in
+    res.redirect("/urls");
   } else {
-    res.render("login"); // Render the login page if user is not logged in
+    res.render("login");
   }
 });
 
-// Route to render the register page
+// Registration page route
 app.get("/register", (req, res) => {
   if (req.cookies.user_id) {
-    res.redirect("/urls"); // Redirect to /urls if user is already logged in
+    res.redirect("/urls");
   } else {
-    res.render("register"); // Render the register page if user is not logged in
+    res.render("register");
   }
 });
 
-// Route to render the form for creating a new URL
+// New url page route
 app.get("/urls/new", (req, res) => {
   if (!req.cookies.user_id) {
-    res.redirect("/login"); // Redirect to login page if user is not logged in
+    res.redirect("/login");
   } else {
     res.render("urls_new", { user: users[req.cookies.user_id] });
   }
 });
 
-// Route to handle creation of new URLs
+// Route to handle creating new urls
 app.post("/urls", (req, res) => {
   if (!req.cookies.user_id) {
-    res.status(401).send("You must be logged in to create a new URL."); // Unauthorized if user is not logged in
+    res.status(401).send("You must be logged in to create a new URL.");
     return;
   }
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL: longURL, userID: req.cookies.user_id };
   res.redirect(`/urls/${shortURL}`);
 });
 
-// Route to render the URLs page
-app.get("/urls", (req, res) => {
-  const templateVars = {
-    user: null, // User data will be populated if logged in
-    urls: urlDatabase
-  };
-  res.render("urls_index", templateVars);
-});
-
-// Route to render details of a specific URL
+// Route to handle displaying a specific url
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
-  if (longURL) {
-    const templateVars = { id: id, longURL: longURL, user: null };
-    res.render("urls_show", templateVars);
-  } else {
-    res.status(404).send("Short URL not found");
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    res.status(401).send("You must be logged in to view this URL.");
+    return;
   }
-});
-
-// Route to handle invalid URL creation attempt
-app.post("/urls", (req, res) => {
-  res.status(403).send("You are not authorized to create a new URL.");
-});
-
-// Route to handle redirection to the original URL
-app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
-  if (longURL) {
-    res.redirect(longURL); // Redirect to the original URL if it exists
-  } else {
-    res.status(404).send(`
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>404 Not Found</title>
-      </head>
-      <body>
-        <h1>404 Not Found</h1>
-        <p>The requested URL does not exist.</p>
-      </body>
-      </html>
-    `);
+  const url = urlDatabase[id];
+  if (!url) {
+    res.status(404).send("URL not found");
+    return;
   }
+  if (url.userID !== userID) {
+    res.status(403).send("You do not have permission to view this URL.");
+    return;
+  }
+  const templateVars = {
+    user: users[userID],
+    shortURL: id,
+    longURL: url.longURL
+  };
+  res.render("urls_show", templateVars);
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });

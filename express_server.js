@@ -124,7 +124,7 @@ app.set("view engine", "ejs");
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const user = getUserByEmail(email);
-  if (!user || user.password !== password) {
+  if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid email or password");
   }
   res.cookie("user_id", user.id);

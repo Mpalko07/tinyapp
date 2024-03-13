@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -198,6 +199,19 @@ app.get("/urls/:id", (req, res) => {
     longURL: url.longURL
   };
   res.render("urls_show", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  const { email, password } = req.body;
+  const existingUser = getUserByEmail(email);
+  if (existingUser) {
+    return res.status(400).send("User already exists");
+  }
+  const userId = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(password, 10); // Hash the password
+  users[userId] = { id: userId, email: email, password: hashedPassword }; // Store hashed password
+  res.cookie("user_id", userId);
+  res.redirect("/urls");
 });
 
 // Start server

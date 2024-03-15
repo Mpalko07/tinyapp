@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+const getUsersByEmail = require('./helpers.js');
 const app = express();
 const PORT = 8080;
 
@@ -30,16 +31,6 @@ function generateRandomString() {
   }
   return randomString;
 }
-
-// Function to get user by email
-const getUserByEmail = function(email, database) {
-  for (const userId in database) {
-    if (database[userId].email === email) {
-      return database[userId];
-    }
-  }
-  return null;
-};
 
 // Function to associate URLs with specific users
 const associateURLsWithUsers = (userID) => {

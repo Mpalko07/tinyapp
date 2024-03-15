@@ -1,7 +1,7 @@
 const express = require("express");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
-const getUsersByEmail = require('./helpers.js');
+const getUserByEmail = require('./helpers.js');
 const app = express();
 const PORT = 8080;
 
@@ -106,7 +106,7 @@ app.set("view engine", "ejs");
 // Login route
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Invalid email or password");
   }
@@ -187,7 +187,7 @@ app.get("/urls/:id", (req, res) => {
 // Registration post route
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
-  const existingUser = getUserByEmail(email);
+  const existingUser = getUserByEmail(email, users);
   if (existingUser) {
     return res.status(400).send("User already exists");
   }

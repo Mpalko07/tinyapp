@@ -12,15 +12,6 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
-// Database of short URLs
-const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
-  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
-};
-
-// Database of users
-const users = {};
-
 // Function to generate random string
 function generateRandomString() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -31,6 +22,15 @@ function generateRandomString() {
   }
   return randomString;
 }
+
+// Database of short URLs
+const urlDatabase = {
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
+};
+
+// Database of users
+const users = {};
 
 // Function to associate URLs with specific users
 const associateURLsWithUsers = (userID) => {
@@ -75,8 +75,12 @@ app.post("/urls/:id", (req, res) => {
     res.status(403).send("You do not have permission to edit this URL.");
     return;
   }
-  urlDatabase[shortURL].longURL = req.body.longURL;
-  res.redirect("/urls");
+  const templateVars = {
+    user: users[userID],
+    id: shortURL, // Pass shortURL as id to the template
+    longURL: url.longURL
+  };
+  res.render("urls_show", templateVars);
 });
 
 // Route to handle deleting URLs
@@ -100,6 +104,10 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
 // Setting the view engine
 app.set("view engine", "ejs");
 
@@ -116,7 +124,7 @@ app.post("/login", (req, res) => {
 
 // Logout route
 app.post("/logout", (req, res) => {
-  req.session = null; //clear session
+  req.session.destroy(); //clear session
   res.redirect("/login");
 });
 
@@ -154,20 +162,23 @@ app.post("/urls", (req, res) => {
     return;
   }
   const longURL = req.body.longURL;
-  const shortURL = generateRandomString();
+  let shortURL;
+  do {
+    shortURL = generateRandomString();
+  } while (urlDatabase[shortURL]); // Ensure shortURL is unique
   urlDatabase[shortURL] = { longURL: longURL, userID: req.session.user_id };
   res.redirect(`/urls/${shortURL}`);
 });
 
 // Route to handle displaying a specific url
 app.get("/urls/:id", (req, res) => {
-  const id = req.params.id;
+  const shortURL = req.params.id;
   const userID = req.session.user_id;
   if (!userID) {
     res.status(401).send("You must be logged in to view this URL.");
     return;
   }
-  const url = urlDatabase[id];
+  const url = urlDatabase[shortURL];
   if (!url) {
     res.status(404).send("URL not found");
     return;
@@ -178,7 +189,7 @@ app.get("/urls/:id", (req, res) => {
   }
   const templateVars = {
     user: users[userID],
-    shortURL: id,
+    id: shortURL, // Pass shortURL as id to the template
     longURL: url.longURL
   };
   res.render("urls_show", templateVars);
